@@ -21,11 +21,6 @@ import arguments
 
 free_variable_cost = 0.5
 
-class ParseError:    
-    def __init__(self, descr):
-        self._descr = descr
-    def __str__(self):
-        return self._descr
 
 class SourceFile:        
     size_threshold = 5
@@ -121,20 +116,10 @@ class AbstractSyntaxTree:
         else:
             self._height = max([c.propagateHeight() for c in self.getChilds()])+1
         return self._height
-    def getHeight(self):
-        return self._height
     def addChild(self, child, save_parent = False):
         if not save_parent:
             child.setParent(self)
         self._childs.append(child)
-    def setChildCount(self, count):
-        assert(not self._childs)
-        self._childs = count * [None]
-    def setNextUndefinedChild(self, c):
-        for i in range(len(self.getChilds())):
-            if self.getChilds()[i] == None:
-                self._childs[i] = c
-        assert()
     def __str__(self):
         return ' ( ' + self.getName() + ' '.join([str(child) for child in self.getChilds()]) + ' ) '
     def getFullHash(self):
