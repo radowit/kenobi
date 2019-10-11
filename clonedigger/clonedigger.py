@@ -117,13 +117,13 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
 
     if options.cpd_output:
         if options.output is None:
-	    options.output = 'output.xml'
-	report = html_report.CPDXMLReport()
+            options.output = 'output.xml'
+        report = html_report.CPDXMLReport()
     else:
-    	report = html_report.HTMLReport()    
+            report = html_report.HTMLReport()    
 
     if options.output is None:
-    	options.output = 'output.html'
+            options.output = 'output.html'
 
     output_file_name = options.output
 

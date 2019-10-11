@@ -910,12 +910,12 @@ class TestCase(unittest.TestCase):
 
     # override default's unittest.py feature
     def shortDescription(self):
-	"""override default unitest shortDescription to handle correctly
-	generative tests
-	"""
+        """override default unitest shortDescription to handle correctly
+        generative tests
+        """
         if self._current_test_descr is not None:
-	    return self._current_test_descr
-	return super(TestCase, self).shortDescription()
+            return self._current_test_descr
+        return super(TestCase, self).shortDescription()
 
     
     def captured_output(self):
@@ -1104,7 +1104,7 @@ class TestCase(unittest.TestCase):
         """compares two iterables and shows difference between both"""
         got, expected = list(got), list(expected)
         if msg is None:
-	        msg1 = '%s != %s' % (got, expected)
+                msg1 = '%s != %s' % (got, expected)
         else:
             msg1 = msg
         self.assertEquals(len(got), len(expected), msg1)

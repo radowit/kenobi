@@ -68,7 +68,7 @@ If it i not the case, remove the file %s''' % (self.name, self._pid_file))
             # put signal handler
             signal.signal(signal.SIGTERM, self.signal_handler)
             signal.signal(signal.SIGHUP, self.signal_handler)
-		
+                
         
     def run(self):
         """ optionaly go in daemon mode and

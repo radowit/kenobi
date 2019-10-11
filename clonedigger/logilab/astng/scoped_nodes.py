@@ -373,8 +373,8 @@ class FunctionNG(object):
             elif i >= default_idx:
                 default_str = self.defaults[i - default_idx].as_string()
                 name = '%s=%s' % (name.as_string(), default_str)
-	    else:
-		name = name.as_string()
+            else:
+                name = name.as_string()
             result.append(name)
         return ', '.join(result)
 
