@@ -1,7 +1,11 @@
 [run]
-source = clonedigger
+source =
+    clonedigger
+    tests
 branch = true
-omit = clonedigger/logilab/*
+omit =
+    clonedigger/logilab/*
+    */test_data/*
 [report]
 show_missing = true
 skip_covered = true

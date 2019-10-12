@@ -193,22 +193,7 @@ class AbstractSyntaxTree:
         if ignore_none:
             ret -= self._none_count
         return ret    
-    def getTokenCount(self):
-        def rec_calc_size(t):
-            if t.getChildCount():
-                if t.getName() in ['Add', 'Assign', 'Sub', 'Div', 'Mul', 'Mod', 'Function', 'If', 'Class', 'Raise']:
-                    r = 1
-                else:
-                    r = 0
-                for c in t.getChilds():
-                    r += rec_calc_size(c)
-            else:
-                if t.getName()[0] != "'" and t.getName() != 'Pass':
-                   return 0
-                else:
-                   return 1
-            return r
-        return rec_calc_size(self)
+
 
 class StatementSequence:
     def __init__(self, sequence = []):
@@ -237,8 +222,6 @@ class StatementSequence:
         return self._sequence.__len__()
     def __str__(self):
         return ','.join([str(s) for s in self])
-    def getWeight(self):
-        return sum([s.getCluster().getUnifierSize() for s in self._sequence])
     def getSourceFile(self):
         return self._source_file
     def getSourceLines(self):
@@ -276,9 +259,6 @@ class PairSequences:
         return self._sequences.__getitem__(*args)
     def __str__(self):
         return ';\t'.join([str(s) for s in self])
-    def getWeight(self):
-        assert(self[0].getWeight() == self[1].getWeight())
-        return self[0].getWeight()
     def calcDistance(self):
         import anti_unification
         trees = [s.constructTree() for s in self]

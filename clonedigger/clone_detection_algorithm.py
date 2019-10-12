@@ -97,8 +97,6 @@ def findDuplicateCode(source_files, report):
                         mincost = cost
                         bestcluster = cluster
                 assert(local_clusters==[] or bestcluster)
-                if mincost < 0:
-                    pdb.set_trace()
                 assert(mincost >= 0)
                 if bestcluster == None or mincost > arguments.clustering_threshold:
                     newcluster = Cluster(statement)

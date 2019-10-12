@@ -25,7 +25,6 @@ import re
 import os
 import traceback
 from optparse import OptionParser
-from fnmatch import fnmatch
 
 import ast_suppliers
 import clone_detection_algorithm
@@ -45,9 +44,6 @@ Don't forget to remove automatically generated sources, tests and third party li
 Notice:
 The semantics of threshold options is discussed in the paper "Duplicate code detection using anti-unification", which can be downloaded from the site http://clonedigger.sourceforge.net . All arguments are optional. Supported options are: 
 """)
-    cmdline.add_option('-l', '--language', dest='language',
-                       type='choice', choices=['python', 'java', 'lua', 'javascript', 'js'],
-                       help='the programming language')
     cmdline.add_option('--no-recursion', dest='no_recursion',
                        action='store_true', 
                        help='do not traverse directions recursively')    
@@ -83,12 +79,6 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
     cmdline.add_option('--ignore-dir', 
                        action='append', dest='ignore_dirs',
                        help='exclude directories from parsing')
-    cmdline.add_option('--eclipse-output', 
-                       dest='eclipse_output',
-                       help='for internal usage only')
-    cmdline.add_option('--cpd-output', 
-                       action='store_true', dest='cpd_output',
-                       help='output as PMD''s CPD''s XML format. If output file not defined, output.xml is generated')
     cmdline.add_option('--report-unifiers', 
                        action='store_true', dest='report_unifiers',
                        help='')
@@ -99,10 +89,7 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
     cmdline.add_option('--file-list', dest='file_list',
                       help='a file that contains a list of file names that must be processed by Clone Digger')
 
-    cmdline.set_defaults(language='python', 
-                         ingore_dirs=[],
-                         f_prefixes = None,
-                         **arguments.__dict__)
+    cmdline.set_defaults(ingore_dirs=[], f_prefixes = None, **arguments.__dict__)
 
     (options, source_file_names) = cmdline.parse_args()
     if options.f_prefixes != None:
@@ -111,16 +98,8 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
        func_prefixes = ()
     source_files = [] 
 
-    supplier = ast_suppliers.abstract_syntax_tree_suppliers[options.language]
-    if options.language != 'python':
-        options.use_diff = True
-
-    if options.cpd_output:
-        if options.output is None:
-            options.output = 'output.xml'
-        report = html_report.CPDXMLReport()
-    else:
-            report = html_report.HTMLReport()    
+    supplier = ast_suppliers.abstract_syntax_tree_suppliers['python']
+    report = html_report.HTMLReport()    
 
     if options.output is None:
             options.output = 'output.html'
@@ -146,11 +125,7 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
         try:
             print 'Parsing ', file_name, '...',
             sys.stdout.flush()
-            if options.language=='python':
-                source_file = supplier(file_name, func_prefixes)
-            else:
-                # TODO implement func_prefixes for java also
-                source_file = supplier(file_name)
+            source_file = supplier(file_name, func_prefixes)
             source_file.getTree().propagateCoveredLineNumbers()
             source_file.getTree().propagateHeight()
             source_files.append(source_file)
@@ -171,14 +146,14 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
 
     for file_name in source_file_names:
         if os.path.isdir(file_name):
-            if arguments.no_recursion:
+            if argumets.no_recursion:
                 dirpath = file_name
                 files = [os.path.join(file_name, f) for f in os.listdir(file_name) 
                         if os.path.splitext(f)[1][1:] == supplier.extension]
                 for f in files:
                     parse_file(f, func_prefixes)
             else:
-                for dirpath, dirnames, filenames in walk(file_name):
+                for dirpath, __, filenames in walk(file_name):
                     for f in filenames:
                         parse_file(os.path.join(dirpath, f), func_prefixes)
         else:

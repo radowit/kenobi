@@ -41,19 +41,16 @@ class Substitution:
         if initial_value == None:
             initial_value = {}
         self._map = initial_value
-    def substitute(self, tree, without_copying=False):  
+    def substitute(self, tree):  
         if tree in self._map.keys():
             return self._map[tree]
         else:
             if isinstance(tree, FreeVariable):
                 return tree 
-            if without_copying:
-                return tree
-            else:
-                r = AbstractSyntaxTree(tree.getName())
-                for child in tree.getChilds():
-                    r.addChild(self.substitute(child, without_copying))
-                return r
+            r = AbstractSyntaxTree(tree.getName())
+            for child in tree.getChilds():
+                r.addChild(self.substitute(child))
+            return r
 
     def getMap(self):
         return self._map
@@ -124,7 +121,6 @@ class Cluster:
             self._trees = []
             self._max_covered_lines = 0
         Cluster.count += 1
-        self._cluster_number = Cluster.count    
     def getUnifierTree(self):
         return self._unifier_tree
     def getCount(self):
@@ -136,9 +132,6 @@ class Cluster:
         self._n += 1
         self._unifier_tree = Unifier(self.getUnifierTree(), tree).getUnifier()
         self._trees.append(tree)
-    def eraseAllTrees(self):
-        self._n = 0
-        self._trees = []
     def addWithoutUnification(self, tree):
         self._n += 1
         self._trees.append(tree)
@@ -146,5 +139,3 @@ class Cluster:
             self._max_covered_lines = len(tree.getCoveredLineNumbers())
     def getMaxCoveredLines(self):
         return self._max_covered_lines
-    def getUnifierSize(self):
-        return self.getUnifierTree().getSize()
