@@ -41,10 +41,14 @@ The typical usage is:
 python clonedigger.py source_file_1 source_file_2 ...
   or
 python clonedigger.py path_to_source_tree
-Don't forget to remove automatically generated sources, tests and third party libraries from the source tree.
+Don't forget to remove automatically generated sources, tests and third party libraries
+from the source tree.
 
 Notice:
-The semantics of threshold options is discussed in the paper "Duplicate code detection using anti-unification", which can be downloaded from the site http://clonedigger.sourceforge.net . All arguments are optional. Supported options are: 
+The semantics of threshold options is discussed in the paper "Duplicate code detection
+using anti-unification", which can be downloaded
+from the site http://clonedigger.sourceforge.net.
+All arguments are optional. Supported options are:
 """
     )
     cmdline.add_option(
@@ -69,25 +73,39 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
         "--distance-threshold",
         type="int",
         dest="distance_threshold",
-        help="the maximum amount of differences between pair of sequences in clone pair (5 by default). Larger value leads to larger amount of false positives",
+        help=(
+            "the maximum amount of differences between pair of sequences in clone pair "
+            "(5 by default). Larger value leads to larger amount of false positives"
+        ),
     )
     cmdline.add_option(
         "--hashing-depth",
         type="int",
         dest="hashing_depth",
-        help="default value if 1, read the paper for semantics. Computation can be speeded up by increasing this value (but some clones can be missed)",
+        help=(
+            "default value if 1, read the paper for semantics. Computation can be "
+            "speeded up by increasing this value (but some clones can be missed)"
+        ),
     )
     cmdline.add_option(
         "--size-threshold",
         type="int",
         dest="size_threshold",
-        help="the minimum clone size. The clone size for its turn is equal to the count of lines of code in its the largest fragment",
+        help=(
+            "the minimum clone size. The clone size for its turn is equal "
+            "to the count of lines of code in its the largest fragment"
+        ),
     )
     cmdline.add_option(
         "--clusterize-using-dcup",
         action="store_true",
         dest="clusterize_using_dcup",
-        help="mark each statement with its D-cup value instead of the most similar pattern. This option together with --hashing-depth=0 make it possible to catch all considered clones (but it is slow and applicable only to small programs)",
+        help=(
+            "mark each statement with its D-cup value instead of the most similar "
+            "pattern. This option together with --hashing-depth=0 make it possible "
+            "to catch all considered clones (but it is slow and applicable only "
+            "to small programs)"
+        ),
     )
     cmdline.add_option(
         "--dont-print-time",
@@ -106,7 +124,10 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
         "--fast",
         action="store_true",
         dest="clusterize_using_hash",
-        help="find only clones, which differ in variable and function names and constants",
+        help=(
+            "find only clones, which differ in variable and function names "
+            "and constants"
+        ),
     )
     cmdline.add_option(
         "--ignore-dir",
@@ -121,18 +142,24 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
         "--func-prefixes",
         action="store",
         dest="f_prefixes",
-        help="skip functions/methods with these prefixes (provide a CSV string as argument)",
+        help=(
+            "skip functions/methods with these prefixes "
+            "(provide a CSV string as argument)"
+        ),
     )
     cmdline.add_option(
         "--file-list",
         dest="file_list",
-        help="a file that contains a list of file names that must be processed by Clone Digger",
+        help=(
+            "a file that contains a list of file names that must be processed "
+            "by Clone Digger"
+        ),
     )
 
     cmdline.set_defaults(ingore_dirs=[], f_prefixes=None, **arguments.__dict__)
 
     (options, source_file_names) = cmdline.parse_args()
-    if options.f_prefixes != None:
+    if options.f_prefixes is not None:
         func_prefixes = tuple([x.strip() for x in options.f_prefixes.split(",")])
     else:
         func_prefixes = ()
@@ -147,7 +174,7 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
     output_file_name = options.output
 
     for option in cmdline.option_list:
-        if option.dest == "file_list" and options.file_list != None:
+        if option.dest == "file_list" and options.file_list is not None:
             source_file_names.extend(open(options.file_list).read().split())
             continue
         elif option.dest is None:
@@ -171,7 +198,7 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
             source_files.append(source_file)
             report.addFileName(file_name)
             print("done")
-        except:
+        except Exception:
             s = 'Error: can\'t parse "%s" \n: ' % (file_name,) + traceback.format_exc()
             report.addErrorInformation(s)
             print(s)
@@ -212,7 +239,7 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
     report.sortByCloneSize()
     try:
         report.writeReport(output_file_name)
-    except:
+    except Exception:
         print("catched error, removing output file")
         if os.path.exists(output_file_name):
             os.remove(output_file_name)

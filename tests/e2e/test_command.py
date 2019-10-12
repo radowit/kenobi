@@ -12,7 +12,7 @@ def test_no_args():
     out, err = process.communicate()
 
     assert out == 'Input is empty or the size of the input is below the size threshold\n'
-    
+
 
 
 def test_no_duplicates():
@@ -33,7 +33,7 @@ Finding similar sequences of statements... 1  sequences were found
 Refining candidates... 0 clones were found
 Removing dominated clones... 0 clones were removed
 '''
-    
+
     with open('output.html') as result_file:
         with open('tests/e2e/test_data/no_duplicates/output.html') as test_data_file:
             for result_line, data_line in zip(result_file.readlines(), test_data_file.readlines()):
@@ -59,7 +59,7 @@ Finding similar sequences of statements... 1  sequences were found
 Refining candidates... 1 clones were found
 Removing dominated clones... 0 clones were removed
 '''
-    
+
     with open('output.html') as result_file:
         with open('tests/e2e/test_data/duplicate/output.html') as test_data_file:
             for result_line, data_line in zip(result_file.readlines(), test_data_file.readlines()):
@@ -85,7 +85,7 @@ Finding similar sequences of statements... 4  sequences were found
 Refining candidates... 4 clones were found
 Removing dominated clones... -3 clones were removed
 '''
-    
+
     with open('output.html') as result_file:
         with open('tests/e2e/test_data/dup_functions/output.html') as test_data_file:
             for result_line, data_line in zip(result_file.readlines(), test_data_file.readlines()):
@@ -111,4 +111,4 @@ Finding similar sequences of statements... 1  sequences were found
 Refining candidates... 0 clones were found
 Removing dominated clones... 0 clones were removed
 '''
-    
+

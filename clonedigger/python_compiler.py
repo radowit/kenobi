@@ -51,18 +51,18 @@ class PythonCompilerSourceFile (SourceFile):
 
         def rec_build_tree(compiler_ast_node, is_statement=False):
             def flatten(list):
-                l = []
+                leaf = []
                 for elt in list:
                     t = type(elt)
                     if t is tuple or t is list:
                         for elt2 in flatten(elt):
-                            l.append(elt2)
+                            leaf.append(elt2)
                     else:
-                        l.append(elt)
-                return l
+                        leaf.append(elt)
+                return leaf
 
             def add_childs(childs):
-                assert(type(childs) == type([]))
+                assert isinstance(childs, list)
                 for child in childs:
                     assert(isinstance(child, compiler.ast.Node))
                     t = rec_build_tree(child, is_statement)
@@ -73,31 +73,31 @@ class PythonCompilerSourceFile (SourceFile):
                     r.addChild(t)
 
             def add_leaf_child(child, name):
-                assert(not (type(child) == type([])))
-                assert(not isinstance(child, compiler.ast.Node))
+                assert not isinstance(child, list)
+                assert not isinstance(child, compiler.ast.Node)
                 t = AbstractSyntaxTree(repr(child))
                 t.setParent(r)
-                l = PythonNodeLeaf(child)
-                t.ast_node = l
+                leaf = PythonNodeLeaf(child)
+                t.ast_node = leaf
                 r.addChild(t)
-                setattr(r.ast_node, name, l)
+                setattr(r.ast_node, name, leaf)
                 return t
 
             def add_leaf_childs(childs, name):
-                assert(type(childs) == type([]) or type(childs) == type((0,)))
+                assert isinstance(childs, (list, tuple))
                 a = getattr(r.ast_node, name)
                 for i in range(len(childs)):
                     child = childs[i]
                     assert(not isinstance(child, compiler.ast.Node))
                     t = AbstractSyntaxTree(repr(child))
                     t.setParent(r)
-                    l = PythonNodeLeaf(child)
-                    t.ast_node = l
+                    leaf = PythonNodeLeaf(child)
+                    t.ast_node = leaf
                     r.addChild(t)
-                    a[i] = l
+                    a[i] = leaf
 
             def add_leaf_string_childs(childs):
-                assert(type(childs) == type([]))
+                assert isinstance(childs, list)
                 for child in childs:
                     assert(not isinstance(child, compiler.ast.Node))
                     t = AbstractSyntaxTree(repr(child))
@@ -129,16 +129,13 @@ class PythonCompilerSourceFile (SourceFile):
                     add_leaf_string_childs([compiler_ast_node.flags])
                 elif name == "AssName":
                     add_leaf_child(compiler_ast_node.name, 'name')
-#                   add_leaf_child(compiler_ast_node.flags, 'flags')
                 elif name == "AugAssign":
                     add_childs([compiler_ast_node.node])
                     add_leaf_child(compiler_ast_node.op, 'op')
                     add_childs([compiler_ast_node.expr])
                 elif name == "Class":
                     add_leaf_child(compiler_ast_node.name, 'name')
-#                   print '>>>>>>>>>>>>>>>>>>>>', flatten(compiler_ast_node.bases)
                     add_childs(flatten(compiler_ast_node.bases))
-#                   add_leaf_child(compiler_ast_node.doc, 'doc') we don't want class docs in our tree, do we?
                     add_childs([compiler_ast_node.code])
                 elif name == "Compare":
                     add_childs([compiler_ast_node.expr])
@@ -149,11 +146,7 @@ class PythonCompilerSourceFile (SourceFile):
                         compiler_ast_node.ops[i] = (t.ast_node, expr)
                 elif name == "Const":
                     add_leaf_child(repr(compiler_ast_node.value), "value")
-#               elif name == "From":
-#                   add_leaf_child(compiler_ast_node.modname, "modname")
-#                   add_childs(compiler_ast_node.names)
                 elif name == "Function":
-                    #                   add_childs(compiler_ast_node.decorators)  FIXME do we need that?
                     add_leaf_child(compiler_ast_node.name, "name")
                     add_leaf_childs(compiler_ast_node.argnames, "argnames")
                     if compiler_ast_node.defaults == ():
@@ -161,27 +154,22 @@ class PythonCompilerSourceFile (SourceFile):
                     # TODO incomment and fix
                     add_childs(compiler_ast_node.defaults)
                     add_leaf_string_childs([compiler_ast_node.flags])
-#                   add_leaf_child(compiler_ast_node.doc, "doc") same as class docs... we don't need them
                     add_childs([compiler_ast_node.code])
                 elif name == "Getattr":
                     add_childs([compiler_ast_node.expr])
                     add_leaf_child(compiler_ast_node.attrname, "attrname")
                 elif name == "Global":
                     add_leaf_childs(compiler_ast_node.names, "names")
-#               elif name == "Import":
-#                   add_leaf_childs(compiler_ast_node.names, "names")
                 elif name == "Keyword":
                     add_leaf_child(compiler_ast_node.name, "name")
                     add_childs([compiler_ast_node.expr])
                 elif name == "Lambda":
-                    #                   TODO: uncomment and fix
                     add_leaf_childs(compiler_ast_node.argnames, "argnames")
                     if compiler_ast_node.defaults == ():
                         compiler_ast_node.defaults = []
                     add_childs(compiler_ast_node.defaults)
                     add_childs([compiler_ast_node.code])
                 elif name == "Name":
-                    # the most important one :)
                     add_leaf_child(compiler_ast_node.name, "name")
                 else:
                     for c in compiler_ast_node.getChildren():

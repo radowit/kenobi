@@ -70,7 +70,7 @@ class AbstractSyntaxTree:
         self._hash = None
         self._source_file = source_file
         self._is_statement = False
-        if name != None:
+        if name is not None:
             self.setName(name)
 
     def getSourceFile(self):
@@ -184,7 +184,7 @@ class AbstractSyntaxTree:
 
     def __eq__(self, tree2):
         tree1 = self
-        if type(tree2) == type(None):
+        if tree2 is None:
             return False
         if tree1.getName() != tree2.getName():
             return False
@@ -220,7 +220,7 @@ class AbstractSyntaxTree:
 
         def rec_calc_size(t):
             r = 0
-            if not t in observed:
+            if t not in observed:
                 if t.getChildCount():
                     for c in t.getChilds():
                         r += rec_calc_size(c)
@@ -265,7 +265,7 @@ class StatementSequence:
 
     def addStatement(self, statement):
         self._sequence.append(statement)
-        if self._source_file == None:
+        if self._source_file is None:
             self._source_file = statement.getSourceFile()
         else:
             assert self._source_file == statement.getSourceFile()
@@ -336,8 +336,8 @@ class PairSequences:
     def subSequence(self, first, length):
         return PairSequences(
             [
-                StatementSequence(self[0][first : first + length]),
-                StatementSequence(self[1][first : first + length]),
+                StatementSequence(self[0][first: first + length]),
+                StatementSequence(self[1][first: first + length]),
             ]
         )
 

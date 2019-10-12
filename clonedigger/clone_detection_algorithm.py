@@ -54,10 +54,10 @@ def findDuplicateCode(source_files, report):
                     first_statement = sequence[0]
                     print()
                     print("-----------------------------------------")
-                    print(
-                        "Warning: sequences of statements, consists of %d elements is too long."
-                        % (len(sequence),)
-                    )
+                    print((
+                        "Warning: sequences of statements, consists of %d elements "
+                        "is too long."
+                    ) % (len(sequence),))
                     print(
                         "It starts at %s:%d."
                         % (
@@ -69,7 +69,8 @@ def findDuplicateCode(source_files, report):
                         "It will be ignored. Use --force to override this restriction."
                     )
                     print(
-                        "Please refer to http://clonedigger.sourceforge.net/documentation.html"
+                        "Please refer to "
+                        "http://clonedigger.sourceforge.net/documentation.html"
                     )
                     print("-----------------------------------------")
                 else:
@@ -116,7 +117,7 @@ def findDuplicateCode(source_files, report):
                         bestcluster = cluster
                 assert local_clusters == [] or bestcluster
                 assert mincost >= 0
-                if bestcluster == None or mincost > arguments.clustering_threshold:
+                if bestcluster is None or mincost > arguments.clustering_threshold:
                     newcluster = Cluster(statement)
                     local_clusters.append(newcluster)
                 else:
@@ -128,7 +129,8 @@ def findDuplicateCode(source_files, report):
     def clusterize(hash_to_statement, clusters_map):
         processed_statements_count = 0
         # clusters_map contain hash values for statements, not unifiers
-        # therefore it will work correct even if unifiers are smaller than hashing depth value
+        # therefore it will work correct even if unifiers are smaller than
+        # hashing depth value
         for h in hash_to_statement.keys():
             clusters = clusters_map[h]
             for statement in hash_to_statement[h]:
@@ -139,7 +141,6 @@ def findDuplicateCode(source_files, report):
                 mincost = sys.maxsize
                 for cluster in clusters:
                     new_u = Unifier(cluster.getUnifierTree(), statement)
-                    #                   assert(new_u.getSubstitutions()[0].getSize() == 0)
                     cost = new_u.getSize()
                     if cost < mincost:
                         mincost = cost
@@ -159,7 +160,7 @@ def findDuplicateCode(source_files, report):
             for i in range(len(sequence)):
                 statement = sequence[i]
                 if statement.getMark() != current_mark:
-                    if flag == True:
+                    if flag is True:
                         flag = False
                     current_mark = statement.getMark()
                     length = 0
@@ -183,17 +184,19 @@ def findDuplicateCode(source_files, report):
                             )
                             print("consists of many similar statements.")
                             print(
-                                "It will be ignored. Use --force to override this restriction."
+                                "It will be ignored. Use --force to "
+                                "override this restriction."
                             )
                             print(
-                                "Please refer to http://clonedigger.sourceforge.net/documentation.html"
+                                "Please refer to "
+                                "http://clonedigger.sourceforge.net/documentation.html"
                             )
                             print("-----------------------------------------")
                             flag = True
             new_sequence = new_sequence + [None]
             cur_sequence = StatementSequence()
             for statement in new_sequence:
-                if statement == None:
+                if statement is None:
                     if cur_sequence:
                         statement_sequences.append(cur_sequence)
                         cur_sequence = StatementSequence()

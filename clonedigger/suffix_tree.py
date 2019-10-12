@@ -59,13 +59,13 @@ class SuffixTree:
     def getBestMaxSubstrings(
         self, threshold, f, f_elem, node=None, initial_threshold=None
     ):
-        if initial_threshold == None:
+        if initial_threshold is None:
             initial_threshold = threshold
 
         def check_left_diverse_and_add(s1, s2, p):
             if (
-                (s1.prevelem == None)
-                or (s2.prevelem == None)
+                (s1.prevelem is None)
+                or (s2.prevelem is None)
                 or (s1.prevelem != s2.prevelem)
             ) and s1.position > p:
                 candidate = (s1.string[: s1.position - p], s2.string[: s2.position - p])
@@ -78,7 +78,7 @@ class SuffixTree:
             else:
                 return False
 
-        if node == None:
+        if node is None:
             node = self._node
         r = []
         if threshold <= 0:

@@ -42,7 +42,7 @@ class FreeVariable(AbstractSyntaxTree):
 
 class Substitution:
     def __init__(self, initial_value=None):
-        if initial_value == None:
+        if initial_value is None:
             initial_value = {}
         self._map = initial_value
 

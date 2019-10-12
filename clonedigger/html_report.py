@@ -103,7 +103,6 @@ class HTMLReport(Report):
                 clone = self._clones[clone_i]
                 s = "<P>"
                 s += "<B>Clone # %d</B><BR>" % (clone_i + 1,)
-                #           s = '<P> Clone detected in source files "%s" and "%s" <BR>\n' % (sequences[0].getSourceFile().getFileName(), sequences[1].getSourceFile().getFileName())
                 s += "Distance between two fragments = %d <BR>" % (clone.calcDistance())
                 s += "Clone size = " + str(
                     max([len(set(clone[i].getCoveredLineNumbers())) for i in [0, 1]])
@@ -113,12 +112,12 @@ class HTMLReport(Report):
                 s += "<TR>"
                 for j in [0, 1]:
                     s += (
-                        '<TD> <a href="clone://%s?%d&%d"> Go to this fragment in Eclipse </a> </TD>'
-                        % (
-                            clone[j].getSourceFile().getFileName(),
-                            min(clone[j][0].getCoveredLineNumbers()),
-                            max(clone[j][-1].getCoveredLineNumbers()),
-                        )
+                        '<TD> <a href="clone://%s?%d&%d"> Go to this fragment in '
+                        'Eclipse </a> </TD>'
+                    ) % (
+                        clone[j].getSourceFile().getFileName(),
+                        min(clone[j][0].getCoveredLineNumbers()),
+                        max(clone[j][-1].getCoveredLineNumbers()),
                     )
                     if j == 0:
                         s += "<TD></TD>"
@@ -153,7 +152,7 @@ class HTMLReport(Report):
                         for i in range(len(blocks)):
                             block = blocks[i]
                             for j in [0, 1]:
-                                r[j] += escape(seqs[j][block[j] : block[j] + block[2]])
+                                r[j] += escape(seqs[j][block[j]: block[j] + block[2]])
                             if i < (len(blocks) - 1):
                                 nextblock = blocks[i + 1]
                                 for j in [0, 1]:
@@ -164,7 +163,7 @@ class HTMLReport(Report):
                                         % (
                                             escape(
                                                 seqs[j][
-                                                    block[j] + block[2] : nextblock[j]
+                                                    block[j] + block[2]: nextblock[j]
                                                 ]
                                             ),
                                         )
@@ -176,7 +175,7 @@ class HTMLReport(Report):
                     for j in (0, 1):
                         for source_line in statements[j].getSourceLines():
                             indentations[j].add(
-                                re.findall("^\s*", source_line)[0].replace(
+                                re.findall(r"^\s*", source_line)[0].replace(
                                     "\t", 4 * " "
                                 )
                             )
@@ -188,7 +187,7 @@ class HTMLReport(Report):
                     def use_diff():
                         for j in (0, 1):
                             for source_line in statements[j].getSourceLines():
-                                indent1 = re.findall("^\s*", source_line)[0]
+                                indent1 = re.findall(r"^\s*", source_line)[0]
                                 indent2 = indent1.replace("\t", 4 * " ")
                                 source_line = re.sub(
                                     "^" + indent1,
@@ -272,9 +271,10 @@ class HTMLReport(Report):
 
                                 d[j] = d[j].replace("\n", "<BR>\n")
 
-                        except:
+                        except Exception:
                             print(
-                                "The following error occured during highlighting of differences on the AST level:"
+                                "The following error occured during highlighting "
+                                "of differences on the AST level:"
                             )
                             traceback.print_exc()
                             print("using diff highlight")
@@ -293,12 +293,13 @@ class HTMLReport(Report):
                     s += "</TR>\n"
                 s += "</TABLE> </P> <HR>"
                 clone_descriptions.append(s)
-            except:
+            except Exception:
                 print("Clone info can't be written to the report. ")
                 traceback.print_exc()
 
         descr = """<P>Source files: %d</P>
-        <a href = "javascript:unhide('files');">Click here to show/hide file names</a><div id="files" class="hidden"><P><B>Source files:</B><BR>%s</P></div>
+        <a href = "javascript:unhide('files');">Click here to show/hide file names</a>
+        <div id="files" class="hidden"><P><B>Source files:</B><BR>%s</P></div>
         <P>Clones detected: %d</P>
         <P>%d of %d lines are duplicates (%.2f%%) </P>
 <P>
@@ -309,7 +310,7 @@ size_threshold = %d<BR>
 hashing_depth = %d<BR>
 clusterize_using_hash = %s<BR>
 clusterize_using_dcup = %s<BR>
-</P> 
+</P>
         """ % (
             len(self._file_names),
             ", <BR>".join(self._file_names),
@@ -357,7 +358,8 @@ clusterize_using_dcup = %s<BR>
                     + str(len(self._mark_to_statement_hash[mark]))
                     + ":"
                     + str(mark.getUnifierTree())
-                    + "<a href=\"javascript:unhide('stmt%d');\">show/hide representatives</a> "
+                    + "<a href=\"javascript:unhide('stmt%d');\">"
+                    + "show/hide representatives</a> "
                     % (counter,)
                 )
                 marks_report += '<div id="stmt%d" class="hidden"> <BR>' % (counter,)
@@ -368,7 +370,10 @@ clusterize_using_dcup = %s<BR>
 
         warnings = ""
         if arguments.use_diff:
-            warnings += "<P>(*) Warning: the highlighting of differences is based on diff and doesn't reflect the tree-based clone detection algorithm.</P>"
+            warnings += (
+                "<P>(*) Warning: the highlighting of differences is based on diff "
+                "and doesn't reflect the tree-based clone detection algorithm.</P>"
+            )
         save_to = (
             eclipse_start
             + '<b><a href="file://%s">Save this report</a></b>' % (file_name,)
@@ -426,7 +431,9 @@ clusterize_using_dcup = %s<BR>
     %s
     %s
     <HR>
-    Clone Digger is aimed to find software clones in Python and Java programs. It is provided under the GPL license and can be downloaded from the site <a href="http://clonedigger.sourceforge.net">http://clonedigger.sourceforge.net</a>
+    Clone Digger is aimed to find software clones in Python and Java programs.
+    It is provided under the GPL license and can be downloaded from the site
+    <a href="http://clonedigger.sourceforge.net">http://clonedigger.sourceforge.net</a>
     </BODY>
 </HTML>""" % (
             errors_info,
