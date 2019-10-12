@@ -16,20 +16,19 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with Clone Digger.  If not, see <http://www.gnu.org/licenses/>.
+import arguments
+import html_report
+import clone_detection_algorithm
+import ast_suppliers
+from optparse import OptionParser
+import traceback
+import os
+import re
 import sys
 
 if __name__ == '__main__':
     sys.modules['clonedigger.logilab'] = __import__('logilab')
 
-import re
-import os
-import traceback
-from optparse import OptionParser
-
-import ast_suppliers
-import clone_detection_algorithm
-import arguments 
-import html_report
 
 def main():
     cmdline = OptionParser(usage="""To run Clone Digger type:
@@ -45,69 +44,70 @@ Notice:
 The semantics of threshold options is discussed in the paper "Duplicate code detection using anti-unification", which can be downloaded from the site http://clonedigger.sourceforge.net . All arguments are optional. Supported options are: 
 """)
     cmdline.add_option('--no-recursion', dest='no_recursion',
-                       action='store_true', 
-                       help='do not traverse directions recursively')    
+                       action='store_true',
+                       help='do not traverse directions recursively')
     cmdline.add_option('-o', '--output', dest='output',
                        help='the name of the output file ("output.html" by default)')
-    cmdline.add_option('--clustering-threshold', 
+    cmdline.add_option('--clustering-threshold',
                        type='int', dest='clustering_threshold',
                        help='read the paper for semantics')
-    cmdline.add_option('--distance-threshold', 
+    cmdline.add_option('--distance-threshold',
                        type='int', dest='distance_threshold',
                        help='the maximum amount of differences between pair of sequences in clone pair (5 by default). Larger value leads to larger amount of false positives')
-    cmdline.add_option('--hashing-depth', 
+    cmdline.add_option('--hashing-depth',
                        type='int', dest='hashing_depth',
                        help='default value if 1, read the paper for semantics. Computation can be speeded up by increasing this value (but some clones can be missed)')
-    cmdline.add_option('--size-threshold', 
+    cmdline.add_option('--size-threshold',
                        type='int', dest='size_threshold',
                        help='the minimum clone size. The clone size for its turn is equal to the count of lines of code in its the largest fragment')
-    cmdline.add_option('--clusterize-using-dcup', 
+    cmdline.add_option('--clusterize-using-dcup',
                        action='store_true', dest='clusterize_using_dcup',
                        help='mark each statement with its D-cup value instead of the most similar pattern. This option together with --hashing-depth=0 make it possible to catch all considered clones (but it is slow and applicable only to small programs)')
-    cmdline.add_option('--dont-print-time', 
+    cmdline.add_option('--dont-print-time',
                        action='store_false', dest='print_time',
                        help='do not print time')
-    cmdline.add_option('-f', '--force', 
+    cmdline.add_option('-f', '--force',
                        action='store_true', dest='force',
                        help='')
-    cmdline.add_option('--force-diff', 
+    cmdline.add_option('--force-diff',
                        action='store_true', dest='use_diff',
                        help='force highlighting of differences based on the diff algorithm')
-    cmdline.add_option('--fast', 
+    cmdline.add_option('--fast',
                        action='store_true', dest='clusterize_using_hash',
                        help='find only clones, which differ in variable and function names and constants')
-    cmdline.add_option('--ignore-dir', 
+    cmdline.add_option('--ignore-dir',
                        action='append', dest='ignore_dirs',
                        help='exclude directories from parsing')
-    cmdline.add_option('--report-unifiers', 
+    cmdline.add_option('--report-unifiers',
                        action='store_true', dest='report_unifiers',
                        help='')
     cmdline.add_option('--func-prefixes',
-                      action='store',
+                       action='store',
                        dest='f_prefixes',
-                      help='skip functions/methods with these prefixes (provide a CSV string as argument)')
+                       help='skip functions/methods with these prefixes (provide a CSV string as argument)')
     cmdline.add_option('--file-list', dest='file_list',
-                      help='a file that contains a list of file names that must be processed by Clone Digger')
+                       help='a file that contains a list of file names that must be processed by Clone Digger')
 
-    cmdline.set_defaults(ingore_dirs=[], f_prefixes = None, **arguments.__dict__)
+    cmdline.set_defaults(ingore_dirs=[], f_prefixes=None, **arguments.__dict__)
 
     (options, source_file_names) = cmdline.parse_args()
     if options.f_prefixes != None:
-       func_prefixes = tuple([x.strip() for x in options.f_prefixes.split(',')])
+        func_prefixes = tuple([x.strip()
+                               for x in options.f_prefixes.split(',')])
     else:
-       func_prefixes = ()
-    source_files = [] 
+        func_prefixes = ()
+    source_files = []
 
     supplier = ast_suppliers.abstract_syntax_tree_suppliers['python']
-    report = html_report.HTMLReport()    
+    report = html_report.HTMLReport()
 
     if options.output is None:
-            options.output = 'output.html'
+        options.output = 'output.html'
 
     output_file_name = options.output
 
     for option in cmdline.option_list:
-        if option.dest == 'file_list' and options.file_list != None:           
+        if option.dest == 'file_list' and options.file_list != None:
             source_file_names.extend(open(options.file_list).read().split())
             continue
         elif option.dest is None:
@@ -118,7 +118,7 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
         arguments.distance_threshold = supplier.distance_threshold
     if options.size_threshold is None:
         arguments.size_threshold = supplier.size_threshold
-    
+
     report.startTimer('Construction of AST')
 
     def parse_file(file_name, func_prefixes):
@@ -129,18 +129,20 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
             source_file.getTree().propagateCoveredLineNumbers()
             source_file.getTree().propagateHeight()
             source_files.append(source_file)
-            report.addFileName(file_name)                
+            report.addFileName(file_name)
             print 'done'
         except:
-            s = 'Error: can\'t parse "%s" \n: '%(file_name,) + traceback.format_exc()
+            s = 'Error: can\'t parse "%s" \n: ' % (
+                file_name,) + traceback.format_exc()
             report.addErrorInformation(s)
             print s
 
     def walk(dirname):
         for dirpath, dirs, files in os.walk(file_name):
-            dirs[:] = (not options.ignore_dirs and dirs)  or [d for d in dirs if d not in options.ignore_dirs]
+            dirs[:] = (not options.ignore_dirs and dirs) or [
+                d for d in dirs if d not in options.ignore_dirs]
             # Skip all non-parseable files
-            files[:] = [f for f in files 
+            files[:] = [f for f in files
                         if os.path.splitext(f)[1][1:] == supplier.extension]
             yield (dirpath, dirs, files)
 
@@ -148,8 +150,8 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
         if os.path.isdir(file_name):
             if argumets.no_recursion:
                 dirpath = file_name
-                files = [os.path.join(file_name, f) for f in os.listdir(file_name) 
-                        if os.path.splitext(f)[1][1:] == supplier.extension]
+                files = [os.path.join(file_name, f) for f in os.listdir(file_name)
+                         if os.path.splitext(f)[1][1:] == supplier.extension]
                 for f in files:
                     parse_file(f, func_prefixes)
             else:
@@ -158,9 +160,10 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
                         parse_file(os.path.join(dirpath, f), func_prefixes)
         else:
             parse_file(file_name, func_prefixes)
-        
+
     report.stopTimer()
-    duplicates = clone_detection_algorithm.findDuplicateCode(source_files, report)
+    duplicates = clone_detection_algorithm.findDuplicateCode(
+        source_files, report)
     for duplicate in duplicates:
         report.addClone(duplicate)
     report.sortByCloneSize()
@@ -170,8 +173,8 @@ The semantics of threshold options is discussed in the paper "Duplicate code det
         print "catched error, removing output file"
         if os.path.exists(output_file_name):
             os.remove(output_file_name)
-        raise 
+        raise
+
 
 if __name__ == '__main__':
     main()
-
