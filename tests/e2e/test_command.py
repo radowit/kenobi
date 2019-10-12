@@ -11,6 +11,7 @@ def test_no_args():
     process = Popen(['clonedigger'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
 
+    assert err == ''
     assert out == 'Input is empty or the size of the input is below the size threshold\n'
 
 
@@ -44,6 +45,7 @@ Removing dominated clones... 0 clones were removed
 def test_duplicates():
     process = Popen(['clonedigger', 'tests/e2e/test_data/duplicate/code.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
+
     assert err == ""
     assert out == '''Parsing  tests/e2e/test_data/duplicate/code.py ... done
 31 sequences
@@ -70,6 +72,7 @@ Removing dominated clones... 0 clones were removed
 def test_duplicate_functions():
     process = Popen(['clonedigger', 'tests/e2e/test_data/dup_functions/code.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
+
     assert err == ""
     assert out == '''Parsing  tests/e2e/test_data/dup_functions/code.py ... done
 18 sequences
@@ -96,6 +99,7 @@ Removing dominated clones... -3 clones were removed
 def test_duplicate_functions_with_func_pre():
     process = Popen(['clonedigger', '--func-prefixes=run', 'tests/e2e/test_data/dup_functions/code.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
+
     assert err == ""
     assert out == '''Parsing  tests/e2e/test_data/dup_functions/code.py ... done
 15 sequences
