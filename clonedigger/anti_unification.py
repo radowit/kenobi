@@ -16,7 +16,6 @@
 #   along with Clone Digger.  If not, see <http://www.gnu.org/licenses/>.
 
 import copy
-import sys
 
 from abstract_syntax_tree import *
 import suffix_tree

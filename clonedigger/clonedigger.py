@@ -23,7 +23,6 @@ import ast_suppliers
 from optparse import OptionParser
 import traceback
 import os
-import re
 import sys
 
 if __name__ == '__main__':

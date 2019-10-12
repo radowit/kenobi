@@ -19,9 +19,7 @@ import sys
 import time
 import difflib
 import re
-import copy
 import traceback
-import os.path
 from cgi import escape
 
 import arguments
