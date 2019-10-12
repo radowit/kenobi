@@ -12,13 +12,13 @@ def test_no_args():
     out, err = process.communicate()
 
     assert out == 'Input is empty or the size of the input is below the size threshold\n'
-    assert err == ""
+    
 
 
 def test_no_duplicates():
     process = Popen(['clonedigger', 'tests/e2e/test_data/no_duplicates/code.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
-
+    assert err == ""
     assert out == '''Parsing  tests/e2e/test_data/no_duplicates/code.py ... done
 4 sequences
 average sequence length: 4.500000
@@ -33,7 +33,7 @@ Finding similar sequences of statements... 1  sequences were found
 Refining candidates... 0 clones were found
 Removing dominated clones... 0 clones were removed
 '''
-    assert err == ""
+    
     with open('output.html') as result_file:
         with open('tests/e2e/test_data/no_duplicates/output.html') as test_data_file:
             for result_line, data_line in zip(result_file.readlines(), test_data_file.readlines()):
@@ -44,7 +44,7 @@ Removing dominated clones... 0 clones were removed
 def test_duplicates():
     process = Popen(['clonedigger', 'tests/e2e/test_data/duplicate/code.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
-
+    assert err == ""
     assert out == '''Parsing  tests/e2e/test_data/duplicate/code.py ... done
 31 sequences
 average sequence length: 4.387097
@@ -59,7 +59,7 @@ Finding similar sequences of statements... 1  sequences were found
 Refining candidates... 1 clones were found
 Removing dominated clones... 0 clones were removed
 '''
-    assert err == ""
+    
     with open('output.html') as result_file:
         with open('tests/e2e/test_data/duplicate/output.html') as test_data_file:
             for result_line, data_line in zip(result_file.readlines(), test_data_file.readlines()):
@@ -70,7 +70,7 @@ Removing dominated clones... 0 clones were removed
 def test_duplicate_functions():
     process = Popen(['clonedigger', 'tests/e2e/test_data/dup_functions/code.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
-
+    assert err == ""
     assert out == '''Parsing  tests/e2e/test_data/dup_functions/code.py ... done
 18 sequences
 average sequence length: 4.000000
@@ -85,7 +85,7 @@ Finding similar sequences of statements... 4  sequences were found
 Refining candidates... 4 clones were found
 Removing dominated clones... -3 clones were removed
 '''
-    assert err == ""
+    
     with open('output.html') as result_file:
         with open('tests/e2e/test_data/dup_functions/output.html') as test_data_file:
             for result_line, data_line in zip(result_file.readlines(), test_data_file.readlines()):
@@ -96,7 +96,7 @@ Removing dominated clones... -3 clones were removed
 def test_duplicate_functions_with_func_pre():
     process = Popen(['clonedigger', '--func-prefixes=run', 'tests/e2e/test_data/dup_functions/code.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
-
+    assert err == ""
     assert out == '''Parsing  tests/e2e/test_data/dup_functions/code.py ... done
 15 sequences
 average sequence length: 4.333333
@@ -111,4 +111,4 @@ Finding similar sequences of statements... 1  sequences were found
 Refining candidates... 0 clones were found
 Removing dominated clones... 0 clones were removed
 '''
-    assert err == ""
+    

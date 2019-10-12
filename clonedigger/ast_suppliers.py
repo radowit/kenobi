@@ -17,8 +17,9 @@
 #   along with Clone Digger.  If not, see <http://www.gnu.org/licenses/>.
 
 # Abstract Syntax Tree suppliers
-import python_compiler
+from __future__ import absolute_import
+from . import python_compiler
 
 abstract_syntax_tree_suppliers = {}
 
-abstract_syntax_tree_suppliers['python'] = python_compiler.PythonCompilerSourceFile
+abstract_syntax_tree_suppliers["python"] = python_compiler.PythonCompilerSourceFile

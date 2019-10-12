@@ -16,11 +16,13 @@
 #   You should have received a copy of the GNU General Public License
 #   along with Clone Digger.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
 import compiler
 
-import logilab.astng.nodes
+from .logilab.astng import nodes
 
-from abstract_syntax_tree import *
+from .abstract_syntax_tree import *
+from six.moves import range
 
 
 class PythonNodeLeaf:

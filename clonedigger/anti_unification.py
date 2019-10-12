@@ -15,11 +15,13 @@
 #   You should have received a copy of the GNU General Public License
 #   along with Clone Digger.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
 import copy
 
-import arguments
-import suffix_tree
-from abstract_syntax_tree import *
+from . import arguments
+from . import suffix_tree
+from .abstract_syntax_tree import *
+from six.moves import range
 
 # NOTE that everywhere is written Unifier instead of AntiUnifier, for simplicity
 
@@ -33,8 +35,8 @@ class FreeVariable(AbstractSyntaxTree):
     def __init__(self):
         global free_variables_count
         FreeVariable.free_variables_count += 1
-        name = 'VAR(%d)' % (FreeVariable.free_variables_count, )
-#       self._childs = []
+        name = "VAR(%d)" % (FreeVariable.free_variables_count,)
+        #       self._childs = []
         AbstractSyntaxTree.__init__(self, name)
 
 
@@ -45,7 +47,7 @@ class Substitution:
         self._map = initial_value
 
     def substitute(self, tree):
-        if tree in self._map.keys():
+        if tree in list(self._map.keys()):
             return self._map[tree]
         else:
             if isinstance(tree, FreeVariable):
@@ -69,15 +71,17 @@ class Unifier:
     def __init__(self, t1, t2, ignore_parametrization=False):
         def combineSubs(node, s, t):
             # s and t are 2-tuples
-            assert(s[0].getMap().keys() == s[1].getMap().keys())
-            assert(t[0].getMap().keys() == t[1].getMap().keys())
+            assert list(s[0].getMap().keys()) == list(s[1].getMap().keys())
+            assert list(t[0].getMap().keys()) == list(t[1].getMap().keys())
             newt = (copy.copy(t[0]), copy.copy(t[1]))
             relabel = {}
             for si in s[0].getMap().keys():
                 if not ignore_parametrization:
                     foundone = False
                     for ti in t[0].getMap().keys():
-                        if (s[0].getMap()[si] == t[0].getMap()[ti]) and (s[1].getMap()[si] == t[1].getMap()[ti]):
+                        if (s[0].getMap()[si] == t[0].getMap()[ti]) and (
+                            s[1].getMap()[si] == t[1].getMap()[ti]
+                        ):
                             relabel[si] = ti
                             foundone = True
                             break
@@ -89,7 +93,9 @@ class Unifier:
         def unify(node1, node2):
             if node1 == node2:
                 return (node1, (Substitution(), Substitution()))
-            elif (node1.getName() != node2.getName()) or (node1.getChildCount() != node2.getChildCount()):
+            elif (node1.getName() != node2.getName()) or (
+                node1.getChildCount() != node2.getChildCount()
+            ):
                 var = FreeVariable()
                 return (var, (Substitution({var: node1}), Substitution({var: node2})))
             else:
@@ -98,11 +104,11 @@ class Unifier:
                 retNode = AbstractSyntaxTree(name)
                 count = node1.getChildCount()
                 for i in range(count):
-                    (ai, si) = unify(node1.getChilds()
-                                     [i], node2.getChilds()[i])
+                    (ai, si) = unify(node1.getChilds()[i], node2.getChilds()[i])
                     (ai, s) = combineSubs(ai, si, s)
                     retNode.addChild(ai)
                 return (retNode, s)
+
         (self._unifier, self._substitutions) = unify(t1, t2)
         self._unifier.storeSize()
         for i in (0, 1):
@@ -142,7 +148,10 @@ class Cluster:
 
     def getAddCost(self, tree):
         unifier = Unifier(self.getUnifierTree(), tree)
-        return (self.getCount() * unifier.getSubstitutions()[0].getSize() + unifier.getSubstitutions()[1].getSize())
+        return (
+            self.getCount() * unifier.getSubstitutions()[0].getSize()
+            + unifier.getSubstitutions()[1].getSize()
+        )
 
     def unify(self, tree):
         self._n += 1
