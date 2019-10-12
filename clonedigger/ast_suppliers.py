@@ -18,6 +18,7 @@
 
 # Abstract Syntax Tree suppliers
 import python_compiler
+
 abstract_syntax_tree_suppliers = {}
 
 abstract_syntax_tree_suppliers['python'] = python_compiler.PythonCompilerSourceFile

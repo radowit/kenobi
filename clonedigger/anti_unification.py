@@ -17,9 +17,9 @@
 
 import copy
 
-from abstract_syntax_tree import *
-import suffix_tree
 import arguments
+import suffix_tree
+from abstract_syntax_tree import *
 
 # NOTE that everywhere is written Unifier instead of AntiUnifier, for simplicity
 

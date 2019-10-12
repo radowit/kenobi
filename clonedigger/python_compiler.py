@@ -17,6 +17,7 @@
 #   along with Clone Digger.  If not, see <http://www.gnu.org/licenses/>.
 
 import compiler
+
 import logilab.astng.nodes
 
 from abstract_syntax_tree import *

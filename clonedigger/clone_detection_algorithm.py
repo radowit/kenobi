@@ -17,8 +17,8 @@
 
 import sys
 
-from anti_unification import *
 from abstract_syntax_tree import *
+from anti_unification import *
 
 
 def findDuplicateCode(source_files, report):

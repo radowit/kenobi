@@ -1,5 +1,10 @@
 #!/usr/bin/python
 
+import os
+import sys
+import traceback
+from optparse import OptionParser
+
 #    Copyright 2008 Peter Bulychev
 #
 #    This file is part of Clone Digger.
@@ -17,13 +22,9 @@
 #   You should have received a copy of the GNU General Public License
 #   along with Clone Digger.  If not, see <http://www.gnu.org/licenses/>.
 import arguments
-import html_report
-import clone_detection_algorithm
 import ast_suppliers
-from optparse import OptionParser
-import traceback
-import os
-import sys
+import clone_detection_algorithm
+import html_report
 
 if __name__ == '__main__':
     sys.modules['clonedigger.logilab'] = __import__('logilab')

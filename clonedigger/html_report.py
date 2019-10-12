@@ -15,15 +15,15 @@
 #   You should have received a copy of the GNU General Public License
 #   along with Clone Digger.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-import time
 import difflib
 import re
+import sys
+import time
 import traceback
 from cgi import escape
 
-import arguments
 import anti_unification
+import arguments
 import python_compiler
 from abstract_syntax_tree import AbstractSyntaxTree
 
