@@ -23,7 +23,7 @@ from optparse import OptionParser
 #
 #   You should have received a copy of the GNU General Public License
 #   along with Clone Digger.  If not, see <http://www.gnu.org/licenses/>.
-from . import arguments
+from clonedigger import arguments
 from . import ast_suppliers
 from . import clone_detection_algorithm
 from . import html_report
@@ -216,7 +216,7 @@ All arguments are optional. Supported options are:
 
     for file_name in source_file_names:
         if os.path.isdir(file_name):
-            if argumets.no_recursion:
+            if arguments.no_recursion:
                 dirpath = file_name
                 files = [
                     os.path.join(file_name, f)
