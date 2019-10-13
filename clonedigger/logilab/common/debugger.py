@@ -44,7 +44,7 @@ def getsource(obj):
     The argument may be a module, class, method, function, traceback, frame,
     or code object.  The source code is returned as a single string.  An
     IOError is raised if the source code cannot be retrieved."""
-    lines, lnum = inspect.getsourcelines(obj)
+    lines, lnum = inspect.get_source_lines(obj)
     return ''.join(lines), lnum
 
 

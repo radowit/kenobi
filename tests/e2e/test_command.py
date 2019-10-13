@@ -106,10 +106,10 @@ def test_duplicates_output_error():
     assert err == '''Traceback (most recent call last):
   File "/home/dreamwalker/.virtualenvs/kenobi/bin/clonedigger", line 11, in <module>
     load_entry_point(\'clonedigger\', \'console_scripts\', \'clonedigger\')()
-  File "/home/dreamwalker/Repozytoria/kenobi/clonedigger/clonedigger.py", line 226, in main
-    report.writeReport(output_file_name)
-  File "/home/dreamwalker/Repozytoria/kenobi/clonedigger/html_report.py", line 444, in writeReport
-    f = open(file_name, "w")
+  File "/home/dreamwalker/Repozytoria/kenobi/clonedigger/clonedigger.py", line 228, in main
+    report.write_report(output_file_name)
+  File "/home/dreamwalker/Repozytoria/kenobi/clonedigger/html_report.py", line 458, in write_report
+    with open(file_name, "w") as report_file:
 IOError: [Errno 13] Permission denied: \'output.html\'
 '''
     assert out == '''Parsing  tests/e2e/test_data/duplicate/code.py ... done
@@ -374,10 +374,10 @@ def test_parse_error():
 
     assert out == '''Parsing  tests/e2e/test_data/output.html ... Error: can't parse "tests/e2e/test_data/output.html" 
 : Traceback (most recent call last):
-  File "/home/dreamwalker/Repozytoria/kenobi/clonedigger/clonedigger.py", line 180, in parse_file
-    source_file = supplier(file_name, func_prefixes)
-  File "/home/dreamwalker/Repozytoria/kenobi/clonedigger/python_compiler.py", line 181, in __init__
-    self._setTree(rec_build_tree(compiler.parseFile(file_name)))
+  File "/home/dreamwalker/Repozytoria/kenobi/clonedigger/clonedigger.py", line 179, in parse_file
+    source_file = PythonCompilerSourceFile(file_name, func_prefixes)
+  File "/home/dreamwalker/Repozytoria/kenobi/clonedigger/python_compiler.py", line 187, in __init__
+    self.tree = rec_build_tree(compiler.parseFile(file_name))
   File "/usr/lib64/python2.7/compiler/transformer.py", line 47, in parseFile
     return parse(src)
   File "/usr/lib64/python2.7/compiler/transformer.py", line 51, in parse

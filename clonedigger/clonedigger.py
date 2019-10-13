@@ -24,7 +24,7 @@ from optparse import OptionParser
 #   You should have received a copy of the GNU General Public License
 #   along with Clone Digger.  If not, see <http://www.gnu.org/licenses/>.
 from clonedigger import arguments
-from . import ast_suppliers
+from .python_compiler import PythonCompilerSourceFile
 from . import clone_detection_algorithm
 from . import html_report
 
@@ -150,7 +150,6 @@ All arguments are optional. Supported options are:
         func_prefixes = ()
     source_files = []
 
-    supplier = ast_suppliers.abstract_syntax_tree_suppliers["python"]
     report = html_report.HTMLReport()
 
     if options.output is None:
@@ -167,35 +166,38 @@ All arguments are optional. Supported options are:
         setattr(arguments, option.dest, getattr(options, option.dest))
 
     if options.distance_threshold is None:
-        arguments.distance_threshold = supplier.distance_threshold
+        arguments.distance_threshold = PythonCompilerSourceFile.distance_threshold
     if options.size_threshold is None:
-        arguments.size_threshold = supplier.size_threshold
+        arguments.size_threshold = PythonCompilerSourceFile.size_threshold
 
-    report.startTimer("Construction of AST")
+    report.start_timer("Construction of AST")
 
     def parse_file(file_name, func_prefixes):
         try:
             print("Parsing ", file_name, "...", end=" ")
             sys.stdout.flush()
-            source_file = supplier(file_name, func_prefixes)
-            source_file.getTree().propagateCoveredLineNumbers()
-            source_file.getTree().propagateHeight()
+            source_file = PythonCompilerSourceFile(file_name, func_prefixes)
+            source_file.tree.propagate_covered_line_numbers()
+            source_file.tree.propagate_height()
             source_files.append(source_file)
-            report.addFileName(file_name)
+            report.add_file_name(file_name)
             print("done")
         except Exception:
-            s = 'Error: can\'t parse "%s" \n: ' % (file_name,) + traceback.format_exc()
-            report.addErrorInformation(s)
-            print(s)
+            error_message = 'Error: can\'t parse "%s" \n: ' % (
+                file_name,
+            ) + traceback.format_exc()
+            report.add_error_information(error_message)
+            print(error_message)
 
-    def walk(dirname):
+    def walk(file_name):
         for dirpath, dirs, files in os.walk(file_name):
-            dirs[:] = (not options.ignore_dirs and dirs) or [
+            dirs[:] = dirs if not options.ignore_dirs else [
                 d for d in dirs if d not in options.ignore_dirs
             ]
             # Skip all non-parseable files
             files[:] = [
-                f for f in files if os.path.splitext(f)[1][1:] == supplier.extension
+                f for f in files
+                if os.path.splitext(f)[1][1:] == PythonCompilerSourceFile.extension
             ]
             yield (dirpath, dirs, files)
 
@@ -206,24 +208,24 @@ All arguments are optional. Supported options are:
                 files = [
                     os.path.join(file_name, f)
                     for f in os.listdir(file_name)
-                    if os.path.splitext(f)[1][1:] == supplier.extension
+                    if os.path.splitext(f)[1][1:] == PythonCompilerSourceFile.extension
                 ]
-                for f in files:
-                    parse_file(f, func_prefixes)
+                for source_file in files:
+                    parse_file(source_file, func_prefixes)
             else:
                 for dirpath, __, filenames in walk(file_name):
-                    for f in filenames:
-                        parse_file(os.path.join(dirpath, f), func_prefixes)
+                    for source_file in filenames:
+                        parse_file(os.path.join(dirpath, source_file), func_prefixes)
         else:
             parse_file(file_name, func_prefixes)
 
-    report.stopTimer()
-    duplicates = clone_detection_algorithm.findDuplicateCode(source_files, report)
+    report.stop_timer()
+    duplicates = clone_detection_algorithm.find_duplicate_code(source_files, report)
     for duplicate in duplicates:
-        report.addClone(duplicate)
-    report.sortByCloneSize()
+        report.add_clone(duplicate)
+    report.sort_by_clone_size()
     try:
-        report.writeReport(output_file_name)
+        report.write_report(output_file_name)
     except Exception:
         print("catched error, removing output file")
         if os.path.exists(output_file_name):

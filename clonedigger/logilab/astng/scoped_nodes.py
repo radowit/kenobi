@@ -664,7 +664,7 @@ class ClassNG(object):
         its ancestors
         """
         done = {}
-        for astng in chain(iter((self,)), self.ancestors()):
+        for astng in chain(iter((self,)), self.ancestors):
             for meth in astng.mymethods():
                 if done.has_key(meth.name):
                     continue

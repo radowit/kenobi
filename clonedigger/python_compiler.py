@@ -19,42 +19,48 @@
 from __future__ import absolute_import
 import compiler
 
+from six.moves import range
 from .logilab.astng import nodes
 
-from .abstract_syntax_tree import *
-from six.moves import range
+from .abstract_syntax_tree import AbstractSyntaxTree
 
 
-class PythonNodeLeaf:
+class PythonNodeLeaf(object):
     def __init__(self, val):
-        self._val = val
-
-    def getVal(self):
-        return self._val
+        self.val = val
 
     def as_string(self):
-        return str(self.getVal())
+        return str(self.val)
 
     def __str__(self):
         return self.as_string()
 
 
-class PythonCompilerSourceFile(SourceFile):
+class PythonCompilerSourceFile(object):
     extension = "py"
     distance_threshold = 5
     size_threshold = 5
     ignored_statements = ["Import", "From"]
 
     def __init__(self, file_name, func_prefixes=()):
-        SourceFile.__init__(self, file_name)
+        def filter_func(line):
+            for i in range(len(line) - 1, -1, -1):
+                if not line[i].isspace():
+                    return line[: i + 1]
+            return line
+
+        with open(file_name, "r") as source_file:
+            self.source_lines = [filter_func(line) for line in source_file.readlines()]
+
+        self.file_name = file_name
+        self.tree = None
         self._func_prefixes = func_prefixes
 
         def rec_build_tree(compiler_ast_node, is_statement=False):
-            def flatten(list):
+            def flatten(node_list):
                 leaf = []
-                for elt in list:
-                    t = type(elt)
-                    if t is tuple or t is list:
+                for elt in node_list:
+                    if isinstance(elt, (tuple, list)):
                         for elt2 in flatten(elt):
                             leaf.append(elt2)
                     else:
@@ -62,12 +68,12 @@ class PythonCompilerSourceFile(SourceFile):
                 return leaf
 
             def _build_tree(child, is_statement):
-                t = rec_build_tree(child, is_statement)
-                if t.getName() in self.ignored_statements:
+                tree = rec_build_tree(child, is_statement)
+                if tree.name in self.ignored_statements:
                     # TODO move it up
                     return
-                t.setParent(r)
-                r.addChild(t)
+                tree.parent = result_tree
+                result_tree.add_child(tree)
 
             def add_childs(childs):
                 assert isinstance(childs, list)
@@ -77,32 +83,32 @@ class PythonCompilerSourceFile(SourceFile):
 
             def add_leaf_child(child, name):
                 assert not isinstance(child, list)
-                t, leaf = _add_child(child)
-                setattr(r.ast_node, name, leaf)
-                return t
+                node, leaf = _add_child(child)
+                setattr(result_tree.ast_node, name, leaf)
+                return node
 
             def add_leaf_childs(childs, name):
                 assert isinstance(childs, (list, tuple))
-                a = getattr(r.ast_node, name)
+                node = getattr(result_tree.ast_node, name)
                 for i in range(len(childs)):
-                    a[i] = _add_child(childs[i])[1]
+                    node[i] = _add_child(childs[i])[1]
 
             def _add_child(child):
                 assert not isinstance(child, compiler.ast.Node)
-                t = AbstractSyntaxTree(repr(child))
-                t.setParent(r)
+                tree = AbstractSyntaxTree(repr(child))
+                tree.parent = result_tree
                 leaf = PythonNodeLeaf(child)
-                t.ast_node = leaf
-                r.addChild(t)
-                return t, leaf
+                tree.ast_node = leaf
+                result_tree.add_child(tree)
+                return tree, leaf
 
             def add_leaf_string_childs(childs):
                 assert isinstance(childs, list)
                 for child in childs:
                     assert not isinstance(child, compiler.ast.Node)
-                    t = AbstractSyntaxTree(repr(child))
-                    t.setParent(t)
-                    r.addChild(t)
+                    tree = AbstractSyntaxTree(repr(child))
+                    tree.parent = tree
+                    result_tree.add_child(tree)
 
             if isinstance(compiler_ast_node, compiler.ast.Node):
                 name = compiler_ast_node.__class__.__name__
@@ -118,10 +124,10 @@ class PythonCompilerSourceFile(SourceFile):
                     lines = [compiler_ast_node.lineno - 1]
                 else:
                     lines = []
-                r = AbstractSyntaxTree(name, lines, self)
-                r.ast_node = compiler_ast_node
+                result_tree = AbstractSyntaxTree(name, lines, self)
+                result_tree.ast_node = compiler_ast_node
                 if is_statement and compiler_ast_node.lineno:
-                    r.markAsStatement()
+                    result_tree.is_statement = True
                 is_statement = name == "Stmt"
                 if name == "AssAttr":
                     add_childs([compiler_ast_node.expr])
@@ -140,10 +146,10 @@ class PythonCompilerSourceFile(SourceFile):
                 elif name == "Compare":
                     add_childs([compiler_ast_node.expr])
                     for i in range(len(compiler_ast_node.ops)):
-                        (op, expr) = compiler_ast_node.ops[i]
-                        t = add_leaf_child(op, "op")
+                        (operator, expr) = compiler_ast_node.ops[i]
+                        tree = add_leaf_child(operator, "op")
                         add_childs([expr])
-                        compiler_ast_node.ops[i] = (t.ast_node, expr)
+                        compiler_ast_node.ops[i] = (tree.ast_node, expr)
                 elif name == "Const":
                     add_leaf_child(repr(compiler_ast_node.value), "value")
                 elif name == "Function":
@@ -172,10 +178,10 @@ class PythonCompilerSourceFile(SourceFile):
                 elif name == "Name":
                     add_leaf_child(compiler_ast_node.name, "name")
                 else:
-                    for c in compiler_ast_node.getChildren():
-                        _build_tree(c, is_statement)
-                return r
+                    for child in compiler_ast_node.getChildren():
+                        _build_tree(child, is_statement)
+                return result_tree
             else:
                 return AbstractSyntaxTree(repr(compiler_ast_node))
 
-        self._setTree(rec_build_tree(compiler.parseFile(file_name)))
+        self.tree = rec_build_tree(compiler.parseFile(file_name))

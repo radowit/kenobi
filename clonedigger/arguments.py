@@ -1,8 +1,11 @@
 clustering_threshold = 10
-hashing_depth = 1
 clusterize_using_dcup = False
-report_unifiers = False
-print_time = True
-force = False
-use_diff = False
 clusterize_using_hash = False
+distance_threshold = None
+force = False
+hashing_depth = 1
+print_time = True
+report_unifiers = False
+size_threshold = None
+use_diff = False
+no_recursion = None

@@ -1,4 +1,5 @@
 from six.moves import range
+from .abstract_syntax_tree import StatementSequence
 
 #    Copyright 2008 Peter Bulychev
 #    http://clonedigger.sourceforge.net
@@ -19,29 +20,27 @@ from six.moves import range
 #   along with Clone Digger.  If not, see <http://www.gnu.org/licenses/>.
 
 
-class SuffixTree:
-    class StringPosition:
+class SuffixTree(object):
+    class StringPosition(object):
         def __init__(self, string, position, prevelem):
             self.string = string
             self.position = position
             self.prevelem = prevelem
 
-    class SuffixTreeNode:
+    class SuffixTreeNode(object):
         def __init__(self):
             self.childs = {}
             self.string_positions = []
             self.ending_strings = []
 
-    def __init__(self, f_code):
+    def __init__(self):
         self._node = self.SuffixTreeNode()
-        self._f_code = f_code
 
     def _add(self, string, prevelem):
         pos = 0
         node = self._node
-        for pos in range(len(string)):
-            e = string[pos]
-            code = self._f_code(e)
+        for pos, char in enumerate(string):
+            code = char.mark
             node.string_positions.append(self.StringPosition(string, pos, prevelem))
             if code not in node.childs:
                 node.childs[code] = self.SuffixTreeNode()
@@ -53,60 +52,64 @@ class SuffixTree:
             if i == 0:
                 prevelem = None
             else:
-                prevelem = self._f_code(string[i - 1])
+                prevelem = string[i - 1].mark
             self._add(string[i:], prevelem)
 
-    def getBestMaxSubstrings(
-        self, threshold, f, f_elem, node=None, initial_threshold=None
-    ):
+    def get_best_max_substrings(self, threshold, node=None, initial_threshold=None):
         if initial_threshold is None:
             initial_threshold = threshold
 
-        def check_left_diverse_and_add(s1, s2, p):
-            if (
-                (s1.prevelem is None)
-                or (s2.prevelem is None)
-                or (s1.prevelem != s2.prevelem)
-            ) and s1.position > p:
-                candidate = (s1.string[: s1.position - p], s2.string[: s2.position - p])
-                if (
-                    f_elem(candidate[0]) >= initial_threshold
-                    or f_elem(candidate[1]) >= initial_threshold
-                ):
-                    r.append(candidate)
+        def check_left_diverse_and_add(string_pos1, string_pos2, position_delta):
+            def get_covered_line_numbers(candidate):
+                return StatementSequence(candidate).covered_line_numbers_count()
+            more_than_position_delta = (
+                (string_pos1.prevelem is None)
+                or (string_pos2.prevelem is None)
+                or (string_pos1.prevelem != string_pos2.prevelem)
+            ) and string_pos1.position > position_delta
+            if more_than_position_delta:
+                candidate = (
+                    string_pos1.string[: string_pos1.position - position_delta],
+                    string_pos2.string[: string_pos2.position - position_delta],
+                )
+
+                def more_than_thres(candidate):
+                    return get_covered_line_numbers(candidate) >= initial_threshold
+                if more_than_thres(candidate[0]) or more_than_thres(candidate[1]):
+                    best_match_substrings.append(candidate)
                 return True
             else:
                 return False
 
         if node is None:
             node = self._node
-        r = []
+        best_match_substrings = []
         if threshold <= 0:
-            for s1 in node.ending_strings:
-                for s2 in node.string_positions:
-                    if s1.string == s2.string:
+            for string_pos1 in node.ending_strings:
+                for string_pos2 in node.string_positions:
+                    if string_pos1.string == string_pos2.string:
                         continue
-                    check_left_diverse_and_add(s1, s2, 0)
+                    check_left_diverse_and_add(string_pos1, string_pos2, 0)
             for i in range(len(node.ending_strings)):
                 for j in range(i):
-                    s1 = node.ending_strings[i]
-                    s2 = node.ending_strings[j]
-                    check_left_diverse_and_add(s1, s2, 0)
+                    string_pos1 = node.ending_strings[i]
+                    string_pos2 = node.ending_strings[j]
+                    check_left_diverse_and_add(string_pos1, string_pos2, 0)
             for i in range(len(list(node.childs.keys()))):
                 for j in range(i):
-                    c1 = list(node.childs.keys())[i]
-                    c2 = list(node.childs.keys())[j]
-                    for s1 in (
-                        node.childs[c1].string_positions
-                        + node.childs[c1].ending_strings
-                    ):
-                        for s2 in (
-                            node.childs[c2].string_positions
-                            + node.childs[c2].ending_strings
-                        ):
-                            check_left_diverse_and_add(s1, s2, 1)
+                    child1 = list(node.childs.keys())[i]
+                    child2 = list(node.childs.keys())[j]
+
+                    def get_all_pos(child):
+                        return (
+                            node.childs[child].string_positions
+                            + node.childs[child].ending_strings
+                        )
+                    for string_pos1 in get_all_pos(child1):
+                        for string_pos2 in get_all_pos(child2):
+                            check_left_diverse_and_add(string_pos1, string_pos2, 1)
         for (code, child) in node.childs.items():
-            r += self.getBestMaxSubstrings(
-                threshold - f(code), f, f_elem, child, initial_threshold
+            best_match_substrings += self.get_best_max_substrings(
+                threshold - code.max_covered_lines, child, initial_threshold
             )
-        return r
+        return best_match_substrings

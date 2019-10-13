@@ -18,148 +18,140 @@
 from __future__ import absolute_import
 import copy
 
-from . import arguments
-from . import suffix_tree
-from .abstract_syntax_tree import *
 from six.moves import range
+
+from .abstract_syntax_tree import FREE_VARIABLE_COST, AbstractSyntaxTree
 
 # NOTE that everywhere is written Unifier instead of AntiUnifier, for simplicity
 
 # Constants here
-verbose = True
+VERBOSE = True
 
 
 class FreeVariable(AbstractSyntaxTree):
     free_variables_count = 1
 
     def __init__(self):
-        global free_variables_count
         FreeVariable.free_variables_count += 1
         name = "VAR(%d)" % (FreeVariable.free_variables_count,)
         #       self._childs = []
         AbstractSyntaxTree.__init__(self, name)
 
 
-class Substitution:
+class Substitution(object):
     def __init__(self, initial_value=None):
         if initial_value is None:
             initial_value = {}
-        self._map = initial_value
+        self.map = initial_value
 
     def substitute(self, tree):
-        if tree in list(self._map.keys()):
-            return self._map[tree]
+        if tree in list(self.map.keys()):
+            return self.map[tree]
         else:
             if isinstance(tree, FreeVariable):
                 return tree
-            r = AbstractSyntaxTree(tree.getName())
-            for child in tree.getChilds():
-                r.addChild(self.substitute(child))
-            return r
+            node = AbstractSyntaxTree(tree.name)
+            for child in tree.children:
+                node.add_child(self.substitute(child))
+            return node
 
-    def getMap(self):
-        return self._map
-
-    def getSize(self):
+    def get_size(self):
         ret = 0
-        for (u, tree) in self.getMap().items():
-            ret += tree.getSize(False) - free_variable_cost
+        for tree in self.map.values():
+            ret += tree.get_size(False) - FREE_VARIABLE_COST
         return ret
 
 
-class Unifier:
-    def __init__(self, t1, t2, ignore_parametrization=False):
-        def combineSubs(node, s, t):
-            # s and t are 2-tuples
-            assert list(s[0].getMap().keys()) == list(s[1].getMap().keys())
-            assert list(t[0].getMap().keys()) == list(t[1].getMap().keys())
-            newt = (copy.copy(t[0]), copy.copy(t[1]))
+class Unifier(object):
+    def __init__(self, tree1, tree2, ignore_parametrization=False):
+        def combine_subs(node, subs1, subs2):
+            # subs1 and subs2 are 2-tuples
+            assert list(subs1[0].map.keys()) == list(
+                subs1[1].map.keys(),
+            )
+            assert list(subs2[0].map.keys()) == list(
+                subs2[1].map.keys(),
+            )
+
+            def cmp_subs(sub0_key, sub1_key):
+                return (
+                    subs1[0].map[sub0_key] == subs2[0].map[sub1_key]
+                    and subs1[1].map[sub0_key] == subs2[1].map[sub1_key]
+                )
+            newt = (copy.copy(subs2[0]), copy.copy(subs2[1]))
             relabel = {}
-            for si in s[0].getMap().keys():
-                if not ignore_parametrization:
-                    foundone = False
-                    for ti in t[0].getMap().keys():
-                        if (s[0].getMap()[si] == t[0].getMap()[ti]) and (
-                            s[1].getMap()[si] == t[1].getMap()[ti]
-                        ):
-                            relabel[si] = ti
-                            foundone = True
-                            break
-                if ignore_parametrization or not foundone:
-                    newt[0].getMap()[si] = s[0].getMap()[si]
-                    newt[1].getMap()[si] = s[1].getMap()[si]
+            for sub0_key in subs1[0].map.keys():
+                if ignore_parametrization:
+                    newt[0].map[sub0_key] = subs1[0].map[sub0_key]
+                    newt[1].map[sub0_key] = subs1[1].map[sub0_key]
+                    continue
+
+                for sub1_key in subs2[0].map.keys():
+                    if cmp_subs(sub0_key, sub1_key):
+                        relabel[sub0_key] = sub1_key
+                        break
+                else:
+                    newt[0].map[sub0_key] = subs1[0].map[sub0_key]
+                    newt[1].map[sub0_key] = subs1[1].map[sub0_key]
             return (Substitution(relabel).substitute(node), newt)
 
         def unify(node1, node2):
             if node1 == node2:
                 return (node1, (Substitution(), Substitution()))
-            elif (node1.getName() != node2.getName()) or (
-                node1.getChildCount() != node2.getChildCount()
-            ):
+            elif node1.name != node2.name or len(node1.children) != len(node2.children):
                 var = FreeVariable()
                 return (var, (Substitution({var: node1}), Substitution({var: node2})))
-            else:
-                s = (Substitution(), Substitution())
-                name = node1.getName()
-                retNode = AbstractSyntaxTree(name)
-                count = node1.getChildCount()
-                for i in range(count):
-                    (ai, si) = unify(node1.getChilds()[i], node2.getChilds()[i])
-                    (ai, s) = combineSubs(ai, si, s)
-                    retNode.addChild(ai)
-                return (retNode, s)
 
-        (self._unifier, self._substitutions) = unify(t1, t2)
-        self._unifier.storeSize()
+            substitutions = (Substitution(), Substitution())
+            name = node1.name
+            return_node = AbstractSyntaxTree(name)
+            count = len(node1.children)
+            for i in range(count):
+                (node, subs) = unify(node1.children[i], node2.children[i])
+                (node, substitutions) = combine_subs(node, subs, substitutions)
+                return_node.add_child(node)
+            return (return_node, substitutions)
+
+        (self.unifier, self.substitutions) = unify(tree1, tree2)
+        self.unifier.store_size()
         for i in (0, 1):
-            for key in self._substitutions[i].getMap():
-                self._substitutions[i].getMap()[key].storeSize()
+            for key in self.substitutions[i].map:
+                self.substitutions[i].map[key].store_size()
 
-    def getSubstitutions(self):
-        return self._substitutions
-
-    def getUnifier(self):
-        return self._unifier
-
-    def getSize(self):
-        return sum([s.getSize() for s in self.getSubstitutions()])
+    def get_size(self):
+        return sum([s.get_size() for s in self.substitutions])
 
 
-class Cluster:
+class Cluster(object):
     count = 0
 
     def __init__(self, tree=None):
         if tree:
             self._n = 1
-            self._unifier_tree = tree
+            self.unifier_tree = tree
             self._trees = [tree]
-            self._max_covered_lines = len(tree.getCoveredLineNumbers())
+            self.max_covered_lines = len(tree.covered_line_numbers)
         else:
             self._n = 0
             self._trees = []
-            self._max_covered_lines = 0
+            self.max_covered_lines = 0
         Cluster.count += 1
 
-    def getUnifierTree(self):
-        return self._unifier_tree
-
-    def getCount(self):
-        return self._n
-
-    def getAddCost(self, tree):
-        substitutions = Unifier(self.getUnifierTree(), tree).getSubstitutions()
-        return self.getCount() * substitutions[0].getSize() + substitutions[1].getSize()
+    def get_add_cost(self, tree):
+        substitutions = Unifier(self.unifier_tree, tree).substitutions
+        return (
+            self._n
+            * substitutions[0].get_size()
+            + substitutions[1].get_size()
+        )
 
     def unify(self, tree):
         self._n += 1
-        self._unifier_tree = Unifier(self.getUnifierTree(), tree).getUnifier()
+        self.unifier_tree = Unifier(self.unifier_tree, tree).unifier
         self._trees.append(tree)
 
-    def addWithoutUnification(self, tree):
+    def add_without_unification(self, tree):
         self._n += 1
         self._trees.append(tree)
-        if len(tree.getCoveredLineNumbers()) > self._max_covered_lines:
-            self._max_covered_lines = len(tree.getCoveredLineNumbers())
-
-    def getMaxCoveredLines(self):
-        return self._max_covered_lines
+        if len(tree.covered_line_numbers) > self.max_covered_lines:
+            self.max_covered_lines = len(tree.covered_line_numbers)
