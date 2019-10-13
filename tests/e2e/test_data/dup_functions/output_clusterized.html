@@ -1,0 +1,101 @@
+
+<HTML>
+    <HEAD>
+        <TITLE> CloneDigger Report </TITLE>
+        <script type="text/javascript">
+        function unhide(divID) {
+            var item = document.getElementById(divID);
+            if (item) {
+                item.className=(item.className=='hidden')?'unhidden':'hidden';
+            }
+        }
+</script>
+
+<style type="text/css">
+.hidden { display: none; }
+.unhidden { display: block; }
+.preformatted {
+        border: 1px dashed #3c78b5;
+    font-size: 11px;
+        font-family: Courier;
+    margin: 10px;
+        line-height: 13px;
+}
+.preformattedHeader {
+    background-color: #f0f0f0;
+        border-bottom: 1px dashed #3c78b5;
+    padding: 3px;
+        text-align: center;
+}
+.preformattedContent {
+    background-color: #f0f0f0;
+    padding: 3px;
+}
+<!--
+<div class="preformatted"><div class="preformattedContent">
+<pre>Clone Digger
+</pre>
+</div></div>
+-->
+
+</style>
+
+    </HEAD>
+    <BODY>
+    
+    
+    <P>Source files: 1</P>
+        <a href = "javascript:unhide('files');">Click here to show/hide file names</a>
+        <div id="files" class="hidden"><P><B>Source files:</B><BR>tests/e2e/test_data/dup_functions/code.py</P></div>
+        <P>Clones detected: 1</P>
+        <P>28 of 132 lines are duplicates (21.21%) </P>
+<P>
+<B>Parameters<BR> </B>
+clustering_threshold = 10<BR>
+distance_threshold = 5<BR>
+size_threshold = 5<BR>
+hashing_depth = 1<BR>
+clusterize_using_hash = False<BR>
+clusterize_using_dcup = True<BR>
+</P>
+        
+    <B>Time elapsed</B><BR>Construction of AST : 0.01 seconds<BR>
+Building statement hash : 0.00 seconds<BR>
+Finding similar sequences of statements : 0.00 seconds<BR>
+Refining candidates : 0.01 seconds<BR>
+ Total time: 0.03<BR>
+ Started at: Sun Oct 13 10:23:54 2019<BR>
+ Finished at: Sun Oct 13 10:23:54 2019
+    <P><B>Clone # 1</B><BR>Distance between two fragments = 1 <BR>Clone size = 14<TABLE NOWRAP WIDTH=100% BORDER=1><TD>Source file "tests/e2e/test_data/dup_functions/code.py"<BR>The first line is 52</TD><TD></TD><TD>Source file "tests/e2e/test_data/dup_functions/code.py"<BR>The first line is 36</TD></TR><TR>
+<TD>
+def <span style="color: rgb(255, 0, 0);">run_validators</span>(self, value):<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;super(SimpleArrayField, self).<span style="color: rgb(255, 0, 0);">run_validators</span>(value)<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;errors = []<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;for index, item in enumerate(value):<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;try:<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self.base_field.<span style="color: rgb(255, 0, 0);">run_validators</span>(item)<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;except ValidationError, error:<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;errors.append(prefix_validation_error(error, prefix=self.error_messages['item_invalid'], code='item_invalid', params={'nth': index}))<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;if errors:<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;raise ValidationError(errors)</TD>
+<TD style="width: 10px;" BGCOLOR=RED> </TD><TD>
+def <span style="color: rgb(255, 0, 0);">validate</span>(self, value):<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;super(SimpleArrayField, self).<span style="color: rgb(255, 0, 0);">validate</span>(value)<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;errors = []<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;for index, item in enumerate(value):<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;try:<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self.base_field.<span style="color: rgb(255, 0, 0);">validate</span>(item)<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;except ValidationError, error:<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;errors.append(prefix_validation_error(error, prefix=self.error_messages['item_invalid'], code='item_invalid', params={'nth': index}))<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;if errors:<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;raise ValidationError(errors)</TD>
+</TR>
+</TABLE> </P> <HR>
+    
+    
+    <HR>
+    Clone Digger is aimed to find software clones in Python and Java programs.
+    It is provided under the GPL license and can be downloaded from the site
+    <a href="http://clonedigger.sourceforge.net">http://clonedigger.sourceforge.net</a>
+    </BODY>
+</HTML>

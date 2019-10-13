@@ -358,9 +358,8 @@ clusterize_using_dcup = %s<BR>
                     + str(len(self._mark_to_statement_hash[mark]))
                     + ":"
                     + str(mark.getUnifierTree())
-                    + "<a href=\"javascript:unhide('stmt%d');\">"
+                    + "<a href=\"javascript:unhide('stmt%d');\">" % (counter,)
                     + "show/hide representatives</a> "
-                    % (counter,)
                 )
                 marks_report += '<div id="stmt%d" class="hidden"> <BR>' % (counter,)
                 for statement in self._mark_to_statement_hash[mark]:
