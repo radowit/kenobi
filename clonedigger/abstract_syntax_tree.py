@@ -152,11 +152,8 @@ class AbstractSyntaxTree:
         self._childs.append(child)
 
     def __str__(self):
-        return (
-            " ( "
-            + self.getName()
-            + " ".join([str(child) for child in self.getChilds()])
-            + " ) "
+        return " ( {0}{1} ) ".format(
+            self.getName(), " ".join([str(child) for child in self.getChilds()])
         )
 
     def getFullHash(self):
@@ -336,8 +333,8 @@ class PairSequences:
     def subSequence(self, first, length):
         return PairSequences(
             [
-                StatementSequence(self[0][first: first + length]),
-                StatementSequence(self[1][first: first + length]),
+                StatementSequence(self[0][first : first + length]),
+                StatementSequence(self[1][first : first + length]),
             ]
         )
 

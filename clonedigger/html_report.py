@@ -113,7 +113,7 @@ class HTMLReport(Report):
                 for j in [0, 1]:
                     s += (
                         '<TD> <a href="clone://%s?%d&%d"> Go to this fragment in '
-                        'Eclipse </a> </TD>'
+                        "Eclipse </a> </TD>"
                     ) % (
                         clone[j].getSourceFile().getFileName(),
                         min(clone[j][0].getCoveredLineNumbers()),
@@ -152,21 +152,17 @@ class HTMLReport(Report):
                         for i in range(len(blocks)):
                             block = blocks[i]
                             for j in [0, 1]:
-                                r[j] += escape(seqs[j][block[j]: block[j] + block[2]])
+                                r[j] += escape(seqs[j][block[j] : block[j] + block[2]])
                             if i < (len(blocks) - 1):
                                 nextblock = blocks[i + 1]
                                 for j in [0, 1]:
                                     r[j] += (
-                                        "<span"
-                                        + very_strange_const
-                                        + 'style="color:rgb(255,0,0);">%s</span>'
-                                        % (
-                                            escape(
-                                                seqs[j][
-                                                    block[j] + block[2]: nextblock[j]
-                                                ]
-                                            ),
-                                        )
+                                        '<span%sstyle="color:rgb(255,0,0);">%s</span>'
+                                    ) % (
+                                        very_strange_const,
+                                        escape(
+                                            seqs[j][block[j] + block[2] : nextblock[j]]
+                                        ),
                                     )
                         return r
 
@@ -215,9 +211,8 @@ class HTMLReport(Report):
                                 def highlight(s):
                                     return (
                                         '<span style="color: rgb(255, 0, 0);">'
-                                        + s
-                                        + "</span>"
-                                    )
+                                        '%s</span>'
+                                    ) % (s,)
 
                                 class NewAsString:
                                     def __init__(self, s):
@@ -285,10 +280,10 @@ class HTMLReport(Report):
                         color = "RED"
                     else:
                         color = "AQUA"
-                    s += (
-                        t[0]
-                        + '<TD style="width: 10px;" BGCOLOR=%s> </TD>' % (color,)
-                        + t[1]
+                    s += '%s<TD style="width: 10px;" BGCOLOR=%s> </TD>%s' % (
+                        t[0],
+                        color,
+                        t[1],
                     )
                     s += "</TR>\n"
                 s += "</TABLE> </P> <HR>"
@@ -317,10 +312,13 @@ clusterize_using_dcup = %s<BR>
             len(self._clones),
             self.covered_source_lines_count,
             self.all_source_lines_count,
-            (not self.all_source_lines_count and 100)
-            or 100
-            * self.covered_source_lines_count
-            / float(self.all_source_lines_count),
+            100
+            if not self.all_source_lines_count
+            else (
+                100
+                * self.covered_source_lines_count
+                / float(self.all_source_lines_count)
+            ),
             arguments.clustering_threshold,
             arguments.distance_threshold,
             arguments.size_threshold,
@@ -354,12 +352,12 @@ clusterize_using_dcup = %s<BR>
             for mark in marks[:20]:
                 counter += 1
                 marks_report += (
-                    "<BR>"
-                    + str(len(self._mark_to_statement_hash[mark]))
-                    + ":"
-                    + str(mark.getUnifierTree())
-                    + "<a href=\"javascript:unhide('stmt%d');\">" % (counter,)
-                    + "show/hide representatives</a> "
+                    "<BR>%s:%s<a href=\"javascript:unhide('stmt%d');\">"
+                    "show/hide representatives</a> "
+                ) % (
+                    str(len(self._mark_to_statement_hash[mark])),
+                    tr(mark.getUnifierTree()),
+                    counter,
                 )
                 marks_report += '<div id="stmt%d" class="hidden"> <BR>' % (counter,)
                 for statement in self._mark_to_statement_hash[mark]:
@@ -373,10 +371,10 @@ clusterize_using_dcup = %s<BR>
                 "<P>(*) Warning: the highlighting of differences is based on diff "
                 "and doesn't reflect the tree-based clone detection algorithm.</P>"
             )
-        save_to = (
-            eclipse_start
-            + '<b><a href="file://%s">Save this report</a></b>' % (file_name,)
-            + eclipse_end
+        save_to = '%s<b><a href="file://%s">Save this report</a></b>%s' % (
+            eclipse_start,
+            file_name,
+            eclipse_end,
         )
         HTML_code = """
 <HTML>

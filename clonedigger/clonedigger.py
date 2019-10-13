@@ -78,24 +78,14 @@ All arguments are optional. Supported options are:
             "(5 by default). Larger value leads to larger amount of false positives"
         ),
     )
-    cmdline.add_option(
-        "--hashing-depth",
-        type="int",
-        dest="hashing_depth",
-        help=(
-            "default value if 1, read the paper for semantics. Computation can be "
-            "speeded up by increasing this value (but some clones can be missed)"
-        ),
-    )
-    cmdline.add_option(
-        "--size-threshold",
-        type="int",
-        dest="size_threshold",
-        help=(
-            "the minimum clone size. The clone size for its turn is equal "
-            "to the count of lines of code in its the largest fragment"
-        ),
-    )
+    cmdline.add_option("--hashing-depth", type="int", dest="hashing_depth", help=(
+        "default value if 1, read the paper for semantics. Computation can be "
+        "speeded up by increasing this value (but some clones can be missed)"
+    ))
+    cmdline.add_option("--size-threshold", type="int", dest="size_threshold", help=(
+        "the minimum clone size. The clone size for its turn is equal "
+        "to the count of lines of code in its the largest fragment"
+    ))
     cmdline.add_option(
         "--clusterize-using-dcup",
         action="store_true",
@@ -138,15 +128,10 @@ All arguments are optional. Supported options are:
     cmdline.add_option(
         "--report-unifiers", action="store_true", dest="report_unifiers", help=""
     )
-    cmdline.add_option(
-        "--func-prefixes",
-        action="store",
-        dest="f_prefixes",
-        help=(
-            "skip functions/methods with these prefixes "
-            "(provide a CSV string as argument)"
-        ),
-    )
+    cmdline.add_option("--func-prefixes", action="store", dest="f_prefixes", help=(
+        "skip functions/methods with these prefixes "
+        "(provide a CSV string as argument)"
+    ))
     cmdline.add_option(
         "--file-list",
         dest="file_list",

@@ -147,11 +147,8 @@ class Cluster:
         return self._n
 
     def getAddCost(self, tree):
-        unifier = Unifier(self.getUnifierTree(), tree)
-        return (
-            self.getCount() * unifier.getSubstitutions()[0].getSize()
-            + unifier.getSubstitutions()[1].getSize()
-        )
+        substitutions = Unifier(self.getUnifierTree(), tree).getSubstitutions()
+        return self.getCount() * substitutions[0].getSize() + substitutions[1].getSize()
 
     def unify(self, tree):
         self._n += 1

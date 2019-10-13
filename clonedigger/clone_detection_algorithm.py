@@ -52,27 +52,23 @@ def findDuplicateCode(source_files, report):
             for sequence in sequences_without_restriction:
                 if len(sequence) > 1000:
                     first_statement = sequence[0]
-                    print()
-                    print("-----------------------------------------")
-                    print((
-                        "Warning: sequences of statements, consists of %d elements "
-                        "is too long."
-                    ) % (len(sequence),))
                     print(
-                        "It starts at %s:%d."
+                        (
+                            "\n-----------------------------------------\n"
+                            "Warning: sequences of statements, consists of %d elements "
+                            "is too long.\n"
+                            "It starts at %s:%d.\nIt will be ignored. "
+                            "Use --force to override this restriction.\n"
+                            "Please refer to "
+                            "http://clonedigger.sourceforge.net/documentation.html\n"
+                            "-----------------------------------------"
+                        )
                         % (
+                            len(sequence),
                             first_statement.getSourceFile().getFileName(),
                             min(first_statement.getCoveredLineNumbers()),
                         )
                     )
-                    print(
-                        "It will be ignored. Use --force to override this restriction."
-                    )
-                    print(
-                        "Please refer to "
-                        "http://clonedigger.sourceforge.net/documentation.html"
-                    )
-                    print("-----------------------------------------")
                 else:
                     sequences.append(sequence)
 
@@ -173,25 +169,24 @@ def findDuplicateCode(source_files, report):
                             for i in range(first_statement_index, i):
                                 new_sequence[i] = None
                             first_statement = sequence[first_statement_index]
-                            print()
-                            print("-----------------------------------------")
                             print(
-                                "Warning: sequence of statements starting at %s:%d"
+                                (
+                                    "\n-----------------------------------------\n"
+                                    "Warning: sequence of statements starting "
+                                    "at %s:%d\n"
+                                    "consists of many similar statements.\n"
+                                    "It will be ignored. Use --force to "
+                                    "override this restriction.\n"
+                                    "Please refer to "
+                                    "http://clonedigger.sourceforge.net/"
+                                    "documentation.html"
+                                    "\n-----------------------------------------"
+                                )
                                 % (
                                     first_statement.getSourceFile().getFileName(),
                                     min(first_statement.getCoveredLineNumbers()),
                                 )
                             )
-                            print("consists of many similar statements.")
-                            print(
-                                "It will be ignored. Use --force to "
-                                "override this restriction."
-                            )
-                            print(
-                                "Please refer to "
-                                "http://clonedigger.sourceforge.net/documentation.html"
-                            )
-                            print("-----------------------------------------")
                             flag = True
             new_sequence = new_sequence + [None]
             cur_sequence = StatementSequence()
